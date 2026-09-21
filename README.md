@@ -44,7 +44,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run format:check` | Prettier check (CI)                                                 |
 | `npm run typecheck`    | `tsc --noEmit`                                                      |
 | `npm run spell`        | cspell on `src/**/*.{ts,tsx}` and root `*.md`                       |
-| `npm test`             | Vitest unit tests (parsers, skill lookups)                          |
+| `npm test`             | Vitest (`tests/unit/*.test.ts`) then Python (`test_*.py`, OSV gate) |
 | `npm run knip`         | Unused export / dead-code check                                     |
 | `npm run e2e`          | Playwright smoke + axe (expects `out/` unless you override the URL) |
 | `npm run favicon`      | Rebuild favicon/PWA icons from `tools/favicon-source.svg`           |
@@ -52,7 +52,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Local CI (match pull-request checks)
 
-CI (`.github/workflows/ci.yml`) runs on pull requests to `main` and on pushes that are **not** `main` or `gh-pages`. Gitleaks (`.github/workflows/gitleaks.yml`) scans pull requests and pushes to `main` and **fails the check if secrets are detected**. OSV-Scanner (`.github/workflows/osv-scanner.yml`) scans `package-lock.json` on pull requests and pushes to `main` and **fails the check on HIGH and CRITICAL findings** (CVSS ≥ 7.0). Deploy (`.github/workflows/deploy.yml`) runs only on push to `main`.
+CI (`.github/workflows/ci.yml`) runs on pull requests to `main` and on pushes that are **not** `main` or `gh-pages`. Gitleaks (`.github/workflows/gitleaks.yml`) scans pull requests and pushes to `main` and **fails the check if secrets are detected**. OSV-Scanner (`.github/workflows/osv-scanner.yml`) scans `package-lock.json` on pull requests and pushes to `main` and **fails the check on HIGH and CRITICAL findings** (CVSS ≥ 7.0). Deploy (`.github/workflows/deploy.yml`) runs only on push to `main` and is a **thinner gate** (`npm ci` → lint → typecheck → build). It does **not** re-run `format:check`, `npm test`, Gitleaks, or OSV — those stay on the PR workflows (Gitleaks/OSV also run on push to `main` as separate jobs and do not block `deploy.yml`).
 
 ```bash
 npm ci
@@ -69,9 +69,9 @@ npm run e2e
 
 Link check in CI uses [lychee](https://github.com/lycheeverse/lychee) with `lychee.toml`. It treats 403/429/999 as success (bot-blocked sites) and excludes LinkedIn, Telegram, WhatsApp, localhost, and `uodo.gov.pl`.
 
-Secret scanning uses [gitleaks](https://github.com/gitleaks/gitleaks) via the [official GitHub Action](https://github.com/gitleaks/gitleaks-action). `.gitleaks.toml` extends the default rules. The only allowlist is a documented false positive: a Git blob SHA in a Wikimedia bash-logo URL that used to live in committed `_next/` chunks (gone from `HEAD`).
+Secret scanning uses [gitleaks](https://github.com/gitleaks/gitleaks) via the [official GitHub Action](https://github.com/gitleaks/gitleaks-action). The workflow pins `GITLEAKS_VERSION` to **8.30.1** and limits `GITHUB_TOKEN` to `contents: read` plus `pull-requests: write` (checkout, PR commit listing, leak comments). `.gitleaks.toml` extends the default rules. The only allowlist is a documented false positive: a Git blob SHA in a Wikimedia bash-logo URL that used to live in committed `_next/` chunks (gone from `HEAD`).
 
-Lockfile scanning uses [OSV-Scanner](https://github.com/google/osv-scanner) via the [official GitHub Action](https://github.com/google/osv-scanner-action) pinned to **v2.5.1**. The workflow scans committed `package-lock.json` (including `devDependencies`). The job fails only on HIGH and CRITICAL (NVD bands: HIGH CVSS ≥ 7.0, CRITICAL ≥ 9.0); medium and low are printed in the log. There are **no** `IgnoredVulns` suppressions. The first scan's HIGH/CRITICAL hits all came from unmaintained [`to-ico`](https://www.npmjs.com/package/to-ico) (`jimp@0.2` → `request`, `form-data`, `image-size`, `url-regex`, `uuid`, nested `minimist`); favicon ICO packing is now a local PNG-in-ICO writer in `tools/generate-favicon.mjs`.
+Lockfile scanning uses [OSV-Scanner](https://github.com/google/osv-scanner) via the [official GitHub Action](https://github.com/google/osv-scanner-action) pinned to **v2.5.1**. The workflow scans committed `package-lock.json` (including `devDependencies`). The job fails only on HIGH and CRITICAL (NVD bands: HIGH CVSS ≥ 7.0, CRITICAL ≥ 9.0); medium and low are printed in the log. If a finding has no `max_severity`, the gate falls back to GitHub `database_specific.severity` when that label is HIGH or CRITICAL; findings with no score and without those labels do not fail. Gate logic is `.github/scripts/osv-fail-on-high-critical.py`, covered by `tests/unit/test_osv_fail.py` (runs under `npm test`). There are **no** `IgnoredVulns` suppressions. The first scan's HIGH/CRITICAL hits all came from unmaintained [`to-ico`](https://www.npmjs.com/package/to-ico) (`jimp@0.2` → `request`, `form-data`, `image-size`, `url-regex`, `uuid`, nested `minimist`); favicon ICO packing is now a local PNG-in-ICO writer in `tools/generate-favicon.mjs`. Scan JSON is gitignored (`osv-results.json`).
 
 Dependabot opens weekly grouped PRs for npm and GitHub Actions. **Major** version bumps are ignored on purpose (Tailwind 4 and cspell 10+ need a manual migration).
 
@@ -90,7 +90,9 @@ To hit a running `next dev` instead:
 PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run e2e
 ```
 
-Tests cover home visibility (hero, navbar, every bento `h2`), resume iframe + download, policy pages, diploma viewer pages, 404 chrome, axe WCAG 2 A/AA (serious/critical only), consent-first GA gating, Lite Mode persistence, and experience chip expansion. Home tests that measure layout set `localStorage.cookie-consent = "rejected"` so the banner does not overlay measurements.
+Tests cover home visibility (hero, navbar, every bento `h2`), `/hire/` conversion sections + axe, resume iframe + download, policy pages, diploma viewer pages, 404 chrome, axe WCAG 2 A/AA (serious/critical only), consent-first GA gating and footer **Cookie settings** reopen, Lite Mode persistence, Academic/labs on Education, and experience chip expansion. Home tests that measure layout set `localStorage.cookie-consent = "rejected"` so the banner does not overlay measurements.
+
+Unit tests (`npm test`) also lock hire copy, home vs `/hire/` SEO, unlinked `/hire/` chrome, Academic/labs isolation, consent reopen / GA inject-unload, and the OSV HIGH/CRITICAL gate.
 
 Common failure: cards or hero stuck at `opacity: 0` after a Framer Motion change. The smoke test asserts computed opacity > 0.5.
 
@@ -120,6 +122,23 @@ No analytics load until the visitor accepts cookies. Implementation: `ConsentPro
 
 Public copy: `/privacy-policy/` and `/cookie-policy/`. If you change storage keys or when GA loads, update those pages in the same PR.
 
+## Hire page (`/hire/`)
+
+Conversion page. Copy is locked in `src/data/hire.ts`; UI is `src/components/hire/*`; route is `src/app/hire/page.tsx`.
+
+- **Live but unlinked.** Primary nav is About / Experience / Resume / Contact (`src/data/nav.ts`). `hireHref` stays `"/hire/"` for the sitemap and direct URL. Do not add “Hire” to the navbar, footer, or homepage hero — `tests/unit/nav.test.ts` and the smoke tests “Hire is unlinked chrome” / “`/hire` stays live unlinked” will fail.
+- Document/OG title is `hirePageMeta`, **not** the locked H1 (`hire.headline`).
+- Three AWS-first packages; package CTAs go to `#contact` on the same page. Proof teasers deep-link to `/#experience`.
+- Outcomes are case-study style, not guaranteed percentages. No GenAI/SKU language. Academic/labs (`devops-skill-demonstration`) must not appear here.
+
+Changing locked strings requires updating `tests/unit/hire.test.ts` and `tests/e2e/hire.spec.ts` in the same PR.
+
+## Academic/labs (Education)
+
+The first Education row is the KhAI GCP/GKE diploma lab (`devops-skill-demonstration`, badge `Academic lab`). Locked blurb: `DIPLOMA_LAB_BLURB` in `src/data/education.ts`.
+
+It is a **skills demonstration**, not a client engagement. Do not copy that org, blurb, or docs URL onto Experience, About, or `/hire`. Career proof stays AWS-first on Experience. Tests: `tests/unit/education.test.ts` and the smoke Education case.
+
 ## Content and assets
 
 **Resume PDF**
@@ -143,18 +162,18 @@ Or run `npm run logos` for Wikimedia-sourced company/university marks. See `publ
 
 ## Routes
 
-| Path                                             | Source                                                                |
-| ------------------------------------------------ | --------------------------------------------------------------------- |
-| `/`                                              | `src/app/page.tsx` — hero + bento grid (detailed resume)              |
-| `/hire/`                                         | Conversion page with AWS-first packages; deep-links to `/#experience` |
-| `/resume/`                                       | Resume iframe + download                                              |
-| `/viewer/{resume\|diploma\|diploma-supplement}/` | Shared PDF viewer (`generateStaticParams`)                            |
-| `/privacy-policy/`, `/cookie-policy/`            | Legal pages (`robots: noindex`)                                       |
-| unknown                                          | `src/app/not-found.tsx` (navbar + footer; required for static 404)    |
+| Path                                             | Source                                                             |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| `/`                                              | `src/app/page.tsx` — hero + bento grid (detailed resume)           |
+| `/hire/`                                         | Conversion page (unlinked chrome; see above). Indexed; in sitemap  |
+| `/resume/`                                       | Resume iframe + download (`robots: noindex`)                       |
+| `/viewer/{resume\|diploma\|diploma-supplement}/` | Shared PDF viewer (`generateStaticParams`, `noindex`)              |
+| `/privacy-policy/`, `/cookie-policy/`            | Legal pages (`robots: noindex`)                                    |
+| unknown                                          | `src/app/not-found.tsx` (navbar + footer; required for static 404) |
 
 ## Deployment
 
-Push to `main` runs lint → typecheck → build → `peaceiris/actions-gh-pages` publishing `./out` to the `gh-pages` branch.
+Push to `main` runs `deploy.yml`: lint → typecheck → build → `peaceiris/actions-gh-pages` publishing `./out` to the `gh-pages` branch. Format, unit tests, Gitleaks, and OSV are not part of that job (see Local CI above).
 
 **GitHub Pages setup (once):**
 
@@ -167,12 +186,13 @@ Push to `main` runs lint → typecheck → build → `peaceiris/actions-gh-pages
 
 ```
 src/
-├── app/           # App Router pages, layout, globals.css
-├── components/    # layout, bento, hero, ui, providers
-├── data/          # profile, hire, experiences, certificates, education, skillIcons
-├── lib/           # animations, analytics, discipline parsing, hooks
+├── app/           # App Router pages (home, hire, resume, viewer, policies)
+├── components/    # layout, bento, hero, hire, ui, providers
+├── data/          # profile, hire, seo, nav, experiences, certificates, education
+├── lib/           # animations, analytics, consent, json-ld, discipline parsing
 └── types/
-public/            # images, pdf, CNAME, manifest, sitemap
+public/            # images, pdf, CNAME, manifest, sitemap, robots.txt
+tests/unit/        # Vitest + Python OSV-gate tests
 tests/e2e/         # Playwright smoke + axe
 tools/             # favicon, logos, PNG→WebP
 .github/workflows/ # ci.yml (PR), gitleaks.yml (PR + main), osv-scanner.yml (PR + main), deploy.yml (main)
@@ -190,6 +210,9 @@ tools/             # favicon, logos, PNG→WebP
 | Lychee fails on a new external URL                   | Bot-blocked host or bad cert                                | Confirm the URL in a browser; add a narrow `exclude` in `lychee.toml` only if the site is known-good |
 | Gitleaks fails on a public SHA or sample string      | Default rule false positive                                 | Prefer rotating/removing the string; a narrow `.gitleaks.toml` allowlist only with a written why     |
 | OSV-Scanner fails on HIGH/CRITICAL                   | Vulnerable package in `package-lock.json`                   | Bump or replace the parent package; `osv-scanner.toml` `IgnoredVulns` only with a written why        |
+| `format:check` fails but the site looks fine         | Prettier not run locally                                    | `npm run format` (tabs, printWidth 80; `package-lock.json` and `public/` are ignored)                |
+| Hire link missing from the navbar                    | Intentional — `/hire/` is unlinked chrome                   | Use the direct URL; do not add it to `navLinks` without updating the nav/smoke tests                 |
+| Academic lab copy showing on Experience or `/hire/`  | Blurb copied into the wrong data file                       | Keep `DIPLOMA_LAB_*` on the Education row only                                                       |
 | Knip reports unused files                            | New page/tool not in `knip.json` `entry`                    | Add `src/app/**/page.tsx`-style entries or `tools/**/*.mjs`                                          |
 | Cookie banner never appears                          | Consent already stored                                      | Footer **Cookie settings**, or `localStorage.removeItem("cookie-consent")`                           |
 | GA fires before accept                               | Script added outside `ConsentProvider`                      | Load gtag only when `consent === "accepted"`                                                         |

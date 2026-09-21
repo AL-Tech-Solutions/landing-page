@@ -103,17 +103,86 @@ interface Education {
   university_title: string;
   university_link: string;
   dates: string;
-  diploma_pdf: string;           // path like /pdf/diploma.pdf
+  diploma_pdf: string;           // path like /pdf/diploma.pdf; empty string hides the link
   diploma_supplement_pdf: string;
   description: string;
   disciplines: string;
   university_logo?: string;  // filename in public/images/education/
+  badge?: string;            // status chip; EducationCard defaults to "Graduated"
 }
 ```
 
 **Export:** `educations: Education[]`
 
+Also exported (locked Academic/labs copy — do not reuse on Experience, About, or `/hire`):
+
+- `DIPLOMA_LAB_BLURB`
+- `DIPLOMA_LAB_ORG_URL` (`https://github.com/devops-skill-demonstration`)
+- `DIPLOMA_LAB_DOCS_URL`
+
+**Academic/labs constraint:** the first `educations` row is the KhAI GCP/GKE diploma lab (`badge: "Academic lab"`). It is a skills demonstration, not a client engagement. Career proof stays AWS-first on Experience. Unit tests (`tests/unit/education.test.ts`) fail if that blurb or org URL leaks into `experiences`, `hire`, or `profile.bio`.
+
 **University logos:** Place WebP files in `public/images/education/`. Convert via `tools/png_to_webp.py` (copy script to folder containing PNGs, then run).
+
+## hire.ts
+
+**Location:** `src/data/hire.ts`
+
+Locked conversion copy for `/hire/`. Change strings only with the matching unit (`tests/unit/hire.test.ts`) and e2e (`tests/e2e/hire.spec.ts`) updates. Do not invent GenAI/SKU language or mention Geniusee.
+
+**Interfaces:**
+
+```typescript
+interface HirePackage {
+  id: string;
+  title: string;
+  pain: string;
+  bestForLabel: string;
+  bestFor: string;
+  deliverables: string;
+  footnote?: string;
+  credentials?: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+interface HireAudienceItem { id: string; line: string; }
+interface HireEngageStep { id: string; title: string; detail: string; }
+interface HireFaqItem { id: string; question: string; answer: string; }
+interface HireProofTeaser { id: string; line: string; linkLabel: string; href: string; }
+interface HireBadge { label: string; href: string; }
+```
+
+**Exports:**
+
+- `hire` — availability, headline (page H1), offer, trust line, CTAs, audience, packages, proof teasers, badges, engage steps, FAQs, contact disclaimer parts
+- `hirePageMeta` — document/OG title + description. **Must not equal** `hire.headline`
+- `HIRE_CONTACT_DISCLAIMER` — full disclaimer sentence; `contactDisclaimerBefore` + `contactDisclaimerLink` + `contactDisclaimerAfter` must concatenate to the same string
+
+**Constraints (enforced by tests):**
+
+- Three AWS-first packages; CTAs go to `#contact` on the same page
+- Proof teasers deep-link to `/#experience` with label `View on resume`
+- Badges (CKA, Terraform Associate, AWS SAA) point at `/#certifications`
+- Every `id` across audience / packages / teasers / steps / FAQs must be unique (used as React keys)
+- Academic/labs (`devops-skill-demonstration`) must not appear here
+
+## seo.ts
+
+**Location:** `src/data/seo.ts`
+
+**Export:** `homePageMeta` — `title`, `description`, `ogTitle`, `ogDescription` for `/`. Resume is the source of truth: do not put hire-flavored CTAs (“Hire a Senior…”) in home meta. Consumed by `src/app/layout.tsx`.
+
+`/hire/` meta is **not** here — it lives in `hirePageMeta` (`src/data/hire.ts`).
+
+## nav.ts
+
+**Location:** `src/data/nav.ts`
+
+**Exports:**
+
+- `navLinks` — primary chrome only: About (`/#about`), Experience (`/#experience`), Resume (`/resume/`), Contact (`/#contact`)
+- `hireHref` — `"/hire/"`. The route stays live (sitemap + direct URL) but **must not** be added to `navLinks`, footer, or homepage hero CTAs. Tests: `tests/unit/nav.test.ts`, smoke “Hire is unlinked chrome”.
 
 ## projects.ts
 

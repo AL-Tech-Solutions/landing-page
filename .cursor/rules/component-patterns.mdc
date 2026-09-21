@@ -58,7 +58,13 @@ Status badges (earned/planned, current/remote) use Tailwind semantic colors (`gr
 
 ## Heading Hierarchy
 
-Inside bento cards with an `<h2>` section title, sub-items must use `<h3>`, never `<h4>`. The hierarchy is: page `h1` (hero) -> card `h2` -> sub-items `h3`.
+Inside bento cards with an `<h2>` section title, sub-items must use `<h3>`, never `<h4>`. The hierarchy is: page `h1` (hero) -> card `h2` -> sub-items `h3`. Same rule on `/hire/` (`HireHero` h1, section h2s, FAQ questions as h3).
+
+`/hire/` FAQ uses native `<details>` keyed by `hire.faqs[].id`. Experience / Education expanders must keep unique `id` / `aria-controls` pairs (smoke test).
+
+## Education badge
+
+`EducationCard` renders `edu.badge ?? "Graduated"`. The diploma lab sets `badge: "Academic lab"`. Empty `diploma_pdf` / `diploma_supplement_pdf` hides those links.
 
 ## Decorative SVGs
 

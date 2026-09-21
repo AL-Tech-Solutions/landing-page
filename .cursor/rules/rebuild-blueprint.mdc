@@ -24,8 +24,8 @@ Use this guide to scaffold and configure a similar portfolio from scratch.
 2. Install dependencies: `npm install framer-motion next-themes simple-icons`
 3. Create folder structure per project-overview:
    - `src/app/` (layout, page, globals.css)
-   - `src/components/` (layout, bento, hero, ui, providers)
-   - `src/data/` (profile, experiences, certificates, education, projects, skillIcons)
+   - `src/components/` (layout, bento, hero, hire, ui, providers)
+   - `src/data/` (profile, hire, seo, nav, experiences, certificates, education, skillIcons)
    - `public/` (images, pdf, CNAME, .nojekyll)
    - `tools/` (png_to_webp.py)
 
@@ -74,13 +74,15 @@ Wrap the app in `src/app/layout.tsx` with:
 2. **ThemeProvider** (next-themes, `attribute="class"`, `storageKey="theme"`, `defaultTheme="system"`)
 3. **ReduceEffectsProvider** — Lite Mode. Reads `localStorage.reduce-effects`. If unset, auto-enables when `prefers-reduced-motion` is reduce, `deviceMemory <= 4`, `hardwareConcurrency <= 4`, or `connection.saveData`.
 
-Include skip link, JSON-LD scripts, and preconnect/dns-prefetch in layout. Do not load `gtag` in `layout.tsx` itself.
+Include skip link and JSON-LD (`personJsonLd` only — no ProfessionalService / OfferCatalog) in layout. Do not load `gtag` or add GA `preconnect` / `dns-prefetch` in `layout.tsx` — consent e2e fails if those hints appear before accept. Home document meta comes from `src/data/seo.ts` (`homePageMeta`).
 
 ## PR validation (optional but this repo has it)
 
-Add `.github/workflows/ci.yml` alongside deploy: lint, typecheck, build, cspell, lychee, knip, Playwright against `out/`. See `README.md` and `config-and-tooling.mdc`.
+Add `.github/workflows/ci.yml` alongside deploy: lint, Prettier `format:check`, typecheck, unit tests (Vitest + Python OSV-gate), build, cspell, lychee, knip, Playwright against `out/`. Secret scan: `gitleaks.yml`. Lockfile HIGH/CRITICAL: `osv-scanner.yml`. See `README.md` and `config-and-tooling.mdc`.
 
 ## Page Structure
+
+Home (`src/app/page.tsx`):
 
 ```tsx
 <Navbar />
@@ -90,6 +92,8 @@ Add `.github/workflows/ci.yml` alongside deploy: lint, typecheck, build, cspell,
 </main>
 <Footer />
 ```
+
+`/hire/` (`src/app/hire/page.tsx`) uses the same chrome. Body order is locked: `HireHero` → Audience → Packages → Proof → Engage → FAQ → Contact (`#contact`). Copy from `src/data/hire.ts`. Keep `/hire/` **out** of `navLinks` (`src/data/nav.ts`); the route stays live via `hireHref` + sitemap.
 
 ## Bento Grid Layout
 
@@ -106,6 +110,7 @@ Add `.github/workflows/ci.yml` alongside deploy: lint, typecheck, build, cspell,
 - Trigger: push to `main` only
 - Steps: checkout, setup-node (`.nvmrc`, cache npm), npm ci, lint, type check, build
 - Deploy: peaceiris/actions-gh-pages, publish_dir: `./out`
+- Does not re-run format, unit tests, Gitleaks, or OSV — those are separate workflows
 
 ### Repo Settings
 
@@ -123,16 +128,19 @@ Add `.github/workflows/ci.yml` alongside deploy: lint, typecheck, build, cspell,
 Replace in `src/data/`:
 
 - profile.ts (name, title, bio, social links, skills, highlights)
+- hire.ts + hirePageMeta (conversion copy; document title ≠ H1)
+- seo.ts (`homePageMeta` — resume-flavored, not hire CTAs)
+- nav.ts (About / Experience / Resume / Contact; keep `hireHref` unlinked)
 - experiences.ts
-- certificates.ts
-- education.ts
+- certificates.ts (earned rows with `link` feed JSON-LD `hasCredential`)
+- education.ts (optional `badge`; Academic/labs stays off Experience and `/hire`)
 - skillIcons.ts (icons, categories, aliases)
 - projects.ts only if you add a portfolio/projects section (this repo does not ship it)
 
 Update in `src/app/layout.tsx`:
 
-- metadata (title, description, keywords, openGraph, twitter)
-- personJsonLd and professionalServiceJsonLd
+- metadata via `homePageMeta` (title, description, openGraph, twitter)
+- `personJsonLd` only (`src/lib/json-ld.ts`) — do not add ProfessionalService, OfferCatalog, email, `worksFor`, or `seeks`
 - SITE_URL and PROFILE_IMAGE constants
 
 Update in `public/manifest.json`:
