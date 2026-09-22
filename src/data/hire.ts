@@ -45,7 +45,7 @@ export const HIRE_CONTACT_DISCLAIMER =
 	"B2B inquiries only. I’ll use your message to reply and talk through a possible engagement (pre-contract). Details in the Privacy Policy. No obligation until we agree scope in writing.";
 
 export const hire = {
-	availability: "Available for Q4 2026 Projects",
+	availability: "Available for Q2 2027 Projects",
 	headline: "Hire DevOps that cuts cloud cost and keeps systems up.",
 	offer: "AWS & Kubernetes · B2B from the EU · Proof on the resume",
 	trustLine: "B2B · GDPR · Poland (EU)",
@@ -194,7 +194,7 @@ export const hire = {
 
 /** Document/OG title — not the locked H1 (`hire.headline`). */
 export const hirePageMeta = {
-	title: "Hire DevOps (AWS & Kubernetes) | Q4 2026 | Andrii Lytvynenko",
+	title: "Hire DevOps (AWS & Kubernetes) | Q2 2027 | Andrii Lytvynenko",
 	description:
 		"B2B DevOps from the EU — cloud cost & reliability, IaC/Kubernetes, CI/CD & observability. Case-study outcomes, not guarantees. Proof on the resume.",
 };

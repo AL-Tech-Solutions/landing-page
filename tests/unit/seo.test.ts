@@ -90,9 +90,9 @@ describe("public JSON-LD", () => {
 });
 
 describe("/hire meta is document title, not H1", () => {
-	it("uses the Q4 2026 document title for OG and Twitter", () => {
+	it("uses the Q2 2027 document title for OG and Twitter", () => {
 		expect(hirePageMeta.title).toBe(
-			"Hire DevOps (AWS & Kubernetes) | Q4 2026 | Andrii Lytvynenko",
+			"Hire DevOps (AWS & Kubernetes) | Q2 2027 | Andrii Lytvynenko",
 		);
 		expect(hirePageMeta.description).toBe(
 			"B2B DevOps from the EU — cloud cost & reliability, IaC/Kubernetes, CI/CD & observability. Case-study outcomes, not guarantees. Proof on the resume.",
