@@ -1,10 +1,11 @@
 # Lychee link-checker config — used by .github/workflows/ci.yml
 
-# Treat anti-bot status codes as success:
+# Treat anti-bot / origin-down status codes as success:
 #   403 — Mercedes-Benz, EPAM, etc. block non-browser User-Agents
 #   429 — Instagram rate-limits CI runners
+#   523 — Cloudflare origin unreachable (khai.edu /en/ flakes in CI)
 #   999 — LinkedIn returns this for any non-browser request
-accept = ["200..=299", "403", "429", "999"]
+accept = ["200..=299", "403", "429", "523", "999"]
 
 max_concurrency = 4
 no_progress = true
