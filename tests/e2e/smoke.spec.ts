@@ -65,7 +65,7 @@ test.describe("home page renders", () => {
 			"Cloud infrastructure that costs less and stays up.",
 		);
 		await expect(
-			page.getByText("Available for Q4 2026 Projects"),
+			page.getByText("Available for Q2 2027 Projects"),
 		).toBeVisible();
 		await expect(
 			page.getByText(

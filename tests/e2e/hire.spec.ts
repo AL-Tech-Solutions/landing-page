@@ -318,7 +318,7 @@ test.describe("hire conversion page", () => {
 			"Hire DevOps that cuts cloud cost and keeps systems up.",
 		);
 		await expect(page).toHaveTitle(
-			"Hire DevOps (AWS & Kubernetes) | Q4 2026 | Andrii Lytvynenko",
+			"Hire DevOps (AWS & Kubernetes) | Q2 2027 | Andrii Lytvynenko",
 		);
 		await expect(page.locator('meta[name="description"]')).toHaveAttribute(
 			"content",
@@ -326,7 +326,7 @@ test.describe("hire conversion page", () => {
 		);
 		await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
 			"content",
-			"Hire DevOps (AWS & Kubernetes) | Q4 2026 | Andrii Lytvynenko",
+			"Hire DevOps (AWS & Kubernetes) | Q2 2027 | Andrii Lytvynenko",
 		);
 		await expect(
 			page.locator('meta[property="og:description"]'),
@@ -336,7 +336,7 @@ test.describe("hire conversion page", () => {
 		);
 		await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute(
 			"content",
-			"Hire DevOps (AWS & Kubernetes) | Q4 2026 | Andrii Lytvynenko",
+			"Hire DevOps (AWS & Kubernetes) | Q2 2027 | Andrii Lytvynenko",
 		);
 		await expect(
 			page.locator('meta[name="twitter:description"]'),

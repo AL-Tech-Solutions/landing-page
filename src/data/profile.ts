@@ -30,7 +30,7 @@ export const profile = {
 	headline: "Cloud infrastructure that costs less and stays up.",
 	subtitle:
 		"Senior DevOps & Cloud Engineer — AWS & Kubernetes, B2B from the EU. Enterprise work via Luxoft (JPMorgan Chase / Mercedes-Benz): up to 50% cloud cost reduction, ~70% fewer incidents.",
-	availability: "Available for Q4 2026 Projects",
+	availability: "Available for Q2 2027 Projects",
 	ctaPrimary: "Let’s talk",
 	ctaSecondary: "Download resume",
 	trustLine: "B2B · GDPR · Poland (EU)",

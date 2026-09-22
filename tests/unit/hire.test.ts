@@ -19,7 +19,8 @@ const sourceOfTruth = [
 
 describe("hire conversion copy", () => {
 	it("locks the Copywriter hero, CTAs, and contact disclaimer", () => {
-		expect(hire.availability).toBe("Available for Q4 2026 Projects");
+		expect(hire.availability).toBe("Available for Q2 2027 Projects");
+		expect(profile.availability).toBe("Available for Q2 2027 Projects");
 		expect(hire.headline).toBe(
 			"Hire DevOps that cuts cloud cost and keeps systems up.",
 		);
@@ -180,7 +181,7 @@ describe("hire conversion copy", () => {
 			"Hire DevOps that cuts cloud cost and keeps systems up.",
 		);
 		expect(hirePageMeta.title).toBe(
-			"Hire DevOps (AWS & Kubernetes) | Q4 2026 | Andrii Lytvynenko",
+			"Hire DevOps (AWS & Kubernetes) | Q2 2027 | Andrii Lytvynenko",
 		);
 		expect(hirePageMeta.title).not.toBe(hire.headline);
 		expect(hirePageMeta.description).toBe(
