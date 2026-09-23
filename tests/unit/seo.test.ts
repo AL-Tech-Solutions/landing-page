@@ -51,11 +51,26 @@ describe("public JSON-LD", () => {
 			"@type": "PostalAddress",
 			addressCountry: "PL",
 		});
+		expect(personJsonLd.hasCredential.map((cred) => cred.name)).toEqual([
+			"HashiCorp Certified: Terraform Associate",
+			"AWS Certified AI Practitioner",
+			"AWS Certified Cloud Practitioner",
+			"Certified Kubernetes Administrator (CKA)",
+			"AWS Certified Solutions Architect - Associate",
+		]);
 		expect(personJsonLd.hasCredential.map((cred) => cred.name)).toEqual(
 			certificates
 				.filter((cert) => Boolean(cert.link))
 				.map((cert) => cert.title),
 		);
+		for (const planned of [
+			"AWS Certified SysOps Administrator - Associate",
+			"AWS Certified Solutions Architect - Professional",
+		]) {
+			expect(personJsonLd.hasCredential.map((cred) => cred.name)).not.toContain(
+				planned,
+			);
+		}
 
 		expect(personJsonLd).not.toHaveProperty("worksFor");
 		expect(personJsonLd).not.toHaveProperty("seeks");
