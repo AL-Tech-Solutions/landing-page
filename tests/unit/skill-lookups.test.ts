@@ -44,6 +44,12 @@ describe("getCategoryForDiscipline", () => {
 		expect(getCategoryForDiscipline("   ")).toBe("other");
 		expect(getCategoryForDiscipline("NotARealSkillXYZ")).toBe("other");
 	});
+
+	it("uses the first token and AWS(/Amazon prefixes", () => {
+		expect(getCategoryForDiscipline("Terraform Modules")).toBe("iac");
+		expect(getCategoryForDiscipline("AWS(Lambda)")).toBe("cloud");
+		expect(getCategoryForDiscipline("Amazon CloudTrail")).toBe("cloud");
+	});
 });
 
 describe("getCanonicalForDiscipline", () => {
@@ -83,5 +89,12 @@ describe("getIconForDiscipline", () => {
 	it("returns null for empty or unknown skills", () => {
 		expect(getIconForDiscipline("")).toBeNull();
 		expect(getIconForDiscipline("NotARealSkillXYZ")).toBeNull();
+	});
+
+	it("uses the first token and AWS( prefix for icons", () => {
+		expect(getIconForDiscipline("Terraform Modules")).toEqual(
+			skillIconMap.Terraform,
+		);
+		expect(getIconForDiscipline("AWS(Lambda)")).toEqual(skillIconMap.AWS);
 	});
 });

@@ -4,48 +4,13 @@ import { notFound } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PdfViewer } from "@/components/ui/PdfViewer";
+import { getViewerDocument, viewerStaticParams } from "@/data/viewer-documents";
 
 const SITE_URL = "https://alytvynenko.net";
 const PROFILE_IMAGE = `${SITE_URL}/images/tm-easy-profile.webp`;
 
-const DOCUMENT_CONFIG: Record<
-	string,
-	{
-		src: string;
-		title: string;
-		downloadName: string;
-		pageTitle: string;
-		description: string;
-	}
-> = {
-	resume: {
-		src: "/pdf/resume.pdf",
-		title: "Andrii Lytvynenko Resume",
-		downloadName: "Andrii_Lytvynenko_Resume.pdf",
-		pageTitle: "Resume - Andrii Lytvynenko",
-		description:
-			"Resume of Andrii Lytvynenko, Senior DevOps & Cloud Engineer. AWS & Kubernetes Certified. Available for B2B contracts.",
-	},
-	diploma: {
-		src: "/pdf/diploma.pdf",
-		title: "Diploma",
-		downloadName: "diploma.pdf",
-		pageTitle: "Diploma - Andrii Lytvynenko",
-		description: "Bachelor's degree diploma from Kharkiv Aviation Institute.",
-	},
-	"diploma-supplement": {
-		src: "/pdf/diploma-supplement.pdf",
-		title: "Diploma Supplement",
-		downloadName: "diploma-supplement.pdf",
-		pageTitle: "Diploma Supplement - Andrii Lytvynenko",
-		description: "Diploma supplement from Kharkiv Aviation Institute.",
-	},
-};
-
-const VALID_DOCUMENTS = Object.keys(DOCUMENT_CONFIG);
-
 export function generateStaticParams() {
-	return VALID_DOCUMENTS.map((document) => ({ document }));
+	return viewerStaticParams();
 }
 
 type Props = {
@@ -54,7 +19,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const { document } = await params;
-	const config = DOCUMENT_CONFIG[document];
+	const config = getViewerDocument(document);
 
 	if (!config) {
 		return { title: "Not Found" };
@@ -89,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ViewerPage({ params }: Props) {
 	const { document } = await params;
-	const config = DOCUMENT_CONFIG[document];
+	const config = getViewerDocument(document);
 
 	if (!config) {
 		notFound();

@@ -22,7 +22,7 @@ const SVG_PATH = path.join(__dirname, "favicon-source.svg");
  * @param {{ width: number, height: number, png: Buffer }[]} images
  * @returns {Buffer}
  */
-function pngsToIco(images) {
+export function pngsToIco(images) {
 	if (images.length === 0) {
 		throw new Error("pngsToIco requires at least one PNG");
 	}
@@ -91,7 +91,13 @@ async function main() {
 	console.log("Favicon set generated in public/images/");
 }
 
-main().catch((err) => {
-	console.error(err);
-	process.exit(1);
-});
+const isDirectRun =
+	Boolean(process.argv[1]) &&
+	path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+	main().catch((err) => {
+		console.error(err);
+		process.exit(1);
+	});
+}
