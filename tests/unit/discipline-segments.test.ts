@@ -38,6 +38,22 @@ describe("parseDisciplineListItems", () => {
 	it("drops blank entries after trim", () => {
 		expect(parseDisciplineListItems(["", "  ", "Docker"])).toEqual(["Docker"]);
 	});
+
+	it("does not expand GCP or Azure parenthetical groups", () => {
+		expect(
+			parseDisciplineListItems(["GCP (GKE, Cloud Run), Terraform"]),
+		).toEqual(["GCP (GKE, Cloud Run)", "Terraform"]);
+		expect(
+			parseDisciplineListItems(["Azure (AKS, Functions), Kubernetes"]),
+		).toEqual(["Azure (AKS, Functions)", "Kubernetes"]);
+	});
+
+	it("expands AWS groups that end with a period and strips mixed-case prefixes", () => {
+		expect(parseDisciplineListItems(["AWS (EC2, S3)."])).toEqual(["EC2", "S3"]);
+		expect(
+			parseDisciplineListItems(["aws Lambda, AWS Cost Explorer."]),
+		).toEqual(["Lambda", "Cost Explorer"]);
+	});
 });
 
 describe("getDisciplineChipDisplayLabel", () => {
