@@ -44,7 +44,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run format:check` | Prettier check (CI)                                                 |
 | `npm run typecheck`    | `tsc --noEmit`                                                      |
 | `npm run spell`        | cspell on `src/**/*.{ts,tsx}` and root `*.md`                       |
-| `npm test`             | Vitest unit tests (parsers, skill lookups)                          |
+| `npm test`             | Vitest (TS) then Python unit tests (`test_*.py`, OSV gate)          |
 | `npm run knip`         | Unused export / dead-code check                                     |
 | `npm run e2e`          | Playwright smoke + axe (expects `out/` unless you override the URL) |
 | `npm run favicon`      | Rebuild favicon/PWA icons from `tools/favicon-source.svg`           |
@@ -90,7 +90,7 @@ To hit a running `next dev` instead:
 PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run e2e
 ```
 
-Tests cover home visibility (hero, navbar, every bento `h2`), resume iframe + download, policy pages, diploma viewer pages, 404 chrome, axe WCAG 2 A/AA (serious/critical only), consent-first GA gating, Lite Mode persistence, and experience chip expansion. Home tests that measure layout set `localStorage.cookie-consent = "rejected"` so the banner does not overlay measurements.
+Tests cover home visibility (hero, navbar, every bento `h2`), `/hire/` conversion sections + axe, resume iframe + download, policy pages, diploma viewer pages, 404 chrome, axe WCAG 2 A/AA (serious/critical only), consent-first GA gating and footer **Cookie settings** reopen, Lite Mode persistence, Academic/labs on Education, and experience chip expansion. Home tests that measure layout set `localStorage.cookie-consent = "rejected"` so the banner does not overlay measurements.
 
 Common failure: cards or hero stuck at `opacity: 0` after a Framer Motion change. The smoke test asserts computed opacity > 0.5.
 
@@ -120,6 +120,25 @@ No analytics load until the visitor accepts cookies. Implementation: `ConsentPro
 
 Public copy: `/privacy-policy/` and `/cookie-policy/`. If you change storage keys or when GA loads, update those pages in the same PR.
 
+## Hire page (`/hire/`)
+
+Conversion page. Copy is locked in `src/data/hire.ts`; UI is `src/components/hire/*`; route is `src/app/hire/page.tsx`.
+
+- **Live but unlinked.** Primary nav is About / Experience / Resume / Contact (`src/data/nav.ts`). `hireHref` stays `"/hire/"` for the sitemap and direct URL. Do not add “Hire” to the navbar or homepage hero — `tests/unit/nav.test.ts` and the smoke test “`/hire` stays live unlinked” will fail.
+- Home hero CTAs are resume-only (`#contact` + download resume).
+- Document/OG title is `hirePageMeta`, **not** the H1 (`hire.headline`).
+- Section order: hero → Who it’s for → Packages → Proof → How we engage → FAQ → Let’s talk (`#contact`). Proof teasers go to `/#experience`.
+- Outcomes are case-study style, not guaranteed percentages. No GenAI/SKU language. Academic/labs (`devops-skill-demonstration`) must not appear here.
+- No extra JSON-LD on this page (home layout already ships the public `Person` node).
+
+Changing locked strings requires updating `tests/unit/hire.test.ts` and `tests/e2e/hire.spec.ts` in the same PR.
+
+## Academic/labs (Education)
+
+The first Education row is the KhAI GCP/GKE diploma lab (`devops-skill-demonstration`, badge `Academic lab`). Locked blurb: `DIPLOMA_LAB_BLURB` in `src/data/education.ts`.
+
+It is a **skills demonstration**, not a client engagement. Do not copy that org, blurb, or docs URL onto Experience, About, or `/hire`. Career proof stays AWS-first on Experience. Tests: `tests/unit/education.test.ts` and the smoke Education case.
+
 ## Content and assets
 
 **Resume PDF**
@@ -143,14 +162,14 @@ Or run `npm run logos` for Wikimedia-sourced company/university marks. See `publ
 
 ## Routes
 
-| Path                                             | Source                                                                |
-| ------------------------------------------------ | --------------------------------------------------------------------- |
-| `/`                                              | `src/app/page.tsx` — hero + bento grid (detailed resume)              |
-| `/hire/`                                         | Conversion page with AWS-first packages; deep-links to `/#experience` |
-| `/resume/`                                       | Resume iframe + download                                              |
-| `/viewer/{resume\|diploma\|diploma-supplement}/` | Shared PDF viewer (`generateStaticParams`)                            |
-| `/privacy-policy/`, `/cookie-policy/`            | Legal pages (`robots: noindex`)                                       |
-| unknown                                          | `src/app/not-found.tsx` (navbar + footer; required for static 404)    |
+| Path                                             | Source                                                             |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| `/`                                              | `src/app/page.tsx` — hero + bento grid (detailed resume)           |
+| `/hire/`                                         | Conversion page (unlinked chrome; see above). Indexed; in sitemap  |
+| `/resume/`                                       | Resume iframe + download (`robots: noindex`)                       |
+| `/viewer/{resume\|diploma\|diploma-supplement}/` | Shared PDF viewer (`generateStaticParams`, `noindex`)              |
+| `/privacy-policy/`, `/cookie-policy/`            | Legal pages (`robots: noindex`)                                    |
+| unknown                                          | `src/app/not-found.tsx` (navbar + footer; required for static 404) |
 
 ## Deployment
 
@@ -167,13 +186,14 @@ Push to `main` runs lint → typecheck → build → `peaceiris/actions-gh-pages
 
 ```
 src/
-├── app/           # App Router pages, layout, globals.css
-├── components/    # layout, bento, hero, ui, providers
-├── data/          # profile, hire, experiences, certificates, education, skillIcons
-├── lib/           # animations, analytics, discipline parsing, hooks
+├── app/           # App Router pages (including hire/), layout, globals.css
+├── components/    # layout, bento, hero, hire, ui, providers
+├── data/          # profile, hire, seo, nav, experiences, certificates, education, skillIcons
+├── lib/           # animations, analytics, consent, json-ld, discipline parsing, hooks
 └── types/
 public/            # images, pdf, CNAME, manifest, sitemap
-tests/e2e/         # Playwright smoke + axe
+tests/e2e/         # Playwright smoke, hire, consent, lite-mode, axe
+tests/unit/        # Vitest + Python OSV-gate tests
 tools/             # favicon, logos, PNG→WebP
 .github/workflows/ # ci.yml (PR), gitleaks.yml (PR + main), osv-scanner.yml (PR + main), deploy.yml (main)
 ```
@@ -192,6 +212,9 @@ tools/             # favicon, logos, PNG→WebP
 | OSV-Scanner fails on HIGH/CRITICAL                   | Vulnerable package in `package-lock.json`                   | Bump or replace the parent package; `osv-scanner.toml` `IgnoredVulns` only with a written why        |
 | Knip reports unused files                            | New page/tool not in `knip.json` `entry`                    | Add `src/app/**/page.tsx`-style entries or `tools/**/*.mjs`                                          |
 | Cookie banner never appears                          | Consent already stored                                      | Footer **Cookie settings**, or `localStorage.removeItem("cookie-consent")`                           |
+| Reject then Accept does not load GA                  | Scripts injected outside `loadGoogleAnalytics()`            | Accept must call `loadGoogleAnalytics()` (direct inject in `src/lib/analytics.ts`)                   |
+| Hire link missing from the navbar                    | Intentional — `/hire/` is unlinked chrome                   | Use the direct URL; do not add it to `navLinks` without updating the nav/smoke tests                 |
+| Academic lab copy showing on Experience or `/hire/`  | Blurb copied into the wrong data file                       | Keep `DIPLOMA_LAB_*` on the Education row only                                                       |
 | GA fires before accept                               | Script added outside `ConsentProvider`                      | Load gtag only when `consent === "accepted"`                                                         |
 | Lite Mode on by default on your laptop               | Auto-detect (≤4 GB / ≤4 cores / Save-Data / reduced motion) | Toggle the navbar bolt, or set `localStorage.reduce-effects = "false"`                               |
 | Horizontal scroll at 320px                           | Flex child overflow                                         | Add `min-w-0` on flex/grid children                                                                  |

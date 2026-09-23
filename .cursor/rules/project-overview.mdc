@@ -80,12 +80,13 @@ This is a personal portfolio website. The site is a Progressive Web App (PWA) bu
 ```
 /
 ├── src/
-│   ├── app/               # Next.js App Router (layout, page, globals.css)
-│   ├── components/        # React components (layout, bento, hero, ui, providers)
-│   ├── data/              # TypeScript data (certificates, education, experiences, profile)
-│   ├── lib/               # Shared utilities (animations.ts, iconPaths.ts, analytics.ts)
-│   └── types/             # TypeScript declarations
-├── public/                # Static assets (images, pdf, CNAME, .nojekyll)
+│   ├── app/               # App Router (home, hire, resume, viewer, policies)
+│   ├── components/        # layout, bento, hero, hire, ui, providers
+│   ├── data/              # profile, hire, seo, nav, experiences, certificates, education
+│   ├── lib/               # animations, analytics, consent, json-ld, discipline parsing
+│   └── types/
+├── public/                # images, pdf, CNAME, .nojekyll, sitemap
+├── tests/                 # Playwright e2e + Vitest / Python unit
 ├── tools/
 │   └── png_to_webp.py     # Image optimization
 └── design/                # Design documentation
@@ -104,9 +105,10 @@ This is a personal portfolio website. The site is a Progressive Web App (PWA) bu
 ### Adding a New Section (Next.js App Router)
 
 1. Add data to appropriate file in `src/data/`
-2. Create or extend component in `src/components/bento/`
-3. Add section to BentoGrid in `src/app/page.tsx`
+2. Create or extend component in `src/components/bento/` (home) or `src/components/hire/` (`/hire/`)
+3. Add the section to `BentoGrid` or `src/app/hire/page.tsx`
 4. Use semantic HTML (`section`, `article`) with proper heading hierarchy
+5. Keep Academic/labs copy on Education only; keep `/hire/` out of primary nav (`src/data/nav.ts`)
 
 ### Modifying Styles
 

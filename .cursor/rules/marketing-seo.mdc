@@ -3,38 +3,52 @@ description: SEO, meta tags, personal brand, structured data
 globs:
   - "**/layout.tsx"
   - "**/page.tsx"
+  - "src/data/seo.ts"
+  - "src/data/hire.ts"
+  - "src/lib/json-ld.ts"
 alwaysApply: false
 ---
 
-# Marketing and SEO Best Practices
+# Marketing and SEO
 
-## Meta Tags
+Implementation lives in `src/data/seo.ts`, `src/data/hire.ts` (`hirePageMeta`), and `src/lib/json-ld.ts`. Tests: `tests/unit/seo.test.ts`.
 
-- **Meta description**: 150-160 characters; compelling, keyword-rich
-- **Title tag**: Descriptive, unique per page; include primary keyword
-- **Viewport**: Required for mobile responsiveness
+## Page meta (do not mix sources)
 
-## Open Graph and Twitter Cards
+| Surface | Source | Index? | Notes |
+| ------- | ------ | ------ | ----- |
+| `/` (root layout default) | `homePageMeta` in `src/data/seo.ts` | yes | Resume-flavored title/description. No “Hire a Senior…” CTAs. |
+| `/hire/` | `hirePageMeta` in `src/data/hire.ts` | yes | Document/OG title is **not** the locked H1 (`hire.headline`). Canonical `https://alytvynenko.net/hire/`. |
+| `/resume/`, `/viewer/*`, `/privacy-policy/`, `/cookie-policy/` | page-local `metadata` | **noindex**, follow | Viewer + legal + resume iframe stay out of the index. |
 
-- Include Open Graph tags for all pages (title, description, image, url)
-- Twitter Card metadata for social sharing
-- Use `summary_large_image` for visual impact
+Open Graph / Twitter on home and `/hire/` use `summary_large_image` and the profile WebP. Home OG type is `profile`; `/hire/` is `website`.
 
-## Structured Data (JSON-LD)
+When you change a public title or description, update the matching `*Meta` object and `tests/unit/seo.test.ts` in the same PR.
 
-- Schema.org Person type for personal profiles
-- ProfessionalService for consulting/contracting
-- Include: name, jobTitle, description, url, image, sameAs (social links)
+## Structured data (JSON-LD)
 
-## Personal Brand Principles
+`src/app/layout.tsx` injects **one** node: `personJsonLd` from `src/lib/json-ld.ts`.
 
-- **Authenticity**: Reflect true self; share genuine journey
-- **Consistency**: Align messaging across pages and platforms
-- **Value proposition**: Clear, concise statement of expertise
-- **Storytelling**: Ground in data and real-world insights
+The public `Person` includes name, jobTitle, url, image, address (Częstochowa, PL), `sameAs`, `knowsAbout`, and `hasCredential` (earned certs only — rows in `certificates.ts` that have a `link`).
 
-## Technical SEO
+**Do not reintroduce** (tests fail if these appear):
 
-- Canonical URLs; robots meta (index, follow)
-- robots.txt and sitemap.xml
-- Descriptive alt text for images
+- `email`, `worksFor`, `seeks`, or `JobPosting`
+- `ProfessionalService` / `OfferCatalog` (acquisition schema is off while the competitive hold stands)
+- Employer name Geniusee on the schema
+- Extra JSON-LD on `/hire/` — that page is HTML + Open Graph only
+
+`hasCredential` is derived from `certificates.filter((cert) => Boolean(cert.link))`. Adding an earned cert with a verification URL updates schema automatically.
+
+## Sitemap and robots
+
+- `public/sitemap.xml` lists `/`, `/hire/`, `/resume/`, and the two policy pages. Bump `lastmod` when the URL’s public content changes.
+- Policy and resume routes stay in the sitemap but send `robots: noindex`.
+- `/hire/` is in the sitemap (`priority` 0.8) even though primary nav does not link it.
+
+## Personal brand constraints
+
+- Home hero and About stay resume-led (AWS-first career proof).
+- `/hire/` is the conversion surface: AWS-first packages, case-study outcomes (not guaranteed %), proof teasers to `/#experience`.
+- Academic/labs (GCP diploma org) stays on Education only — not home meta, not `/hire`.
+- Authenticity: claims on `/hire/` must already appear on Experience or profile highlights (unit tests check 50% / 70% / Luxoft / TFE timing).

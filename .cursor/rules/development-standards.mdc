@@ -45,7 +45,9 @@ npm run lint && npm run format:check && npm run typecheck && npm test && npm run
 npm run e2e   # requires out/ from the build step
 ```
 
-Playwright asserts visibility (computed opacity), not just DOM presence. If you change hero, GlassCard, or Framer Motion `initial` values, run e2e.
+`npm test` is Vitest (`tests/unit/*.test.ts`) **and** `python3 -m unittest discover -s tests/unit -p 'test_*.py'` (OSV HIGH/CRITICAL gate in `.github/scripts/osv-fail-on-high-critical.py`).
+
+Playwright asserts visibility (computed opacity), not just DOM presence. If you change hero, GlassCard, `/hire/` sections, or Framer Motion `initial` values, run e2e (`tests/e2e/hire.spec.ts` plus smoke).
 
 ## Rebuild Context
 
