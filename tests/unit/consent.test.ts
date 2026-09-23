@@ -98,6 +98,32 @@ describe("setStoredConsent", () => {
 	});
 });
 
+describe("denied DOM storage", () => {
+	it("treats blocked localStorage as no choice and still notifies", () => {
+		const denied = () => {
+			throw new DOMException("The operation is insecure.", "SecurityError");
+		};
+		vi.stubGlobal("localStorage", {
+			getItem: denied,
+			setItem: denied,
+			removeItem: denied,
+		});
+
+		const listener = vi.fn();
+		unsubscribers.push(subscribeToConsent(listener));
+
+		expect(getConsentSnapshot()).toBeNull();
+		expect(() => setStoredConsent("accepted")).not.toThrow();
+		expect(listener).toHaveBeenCalledTimes(1);
+		expect(getConsentSnapshot()).toBeNull();
+
+		listener.mockClear();
+		expect(() => reopenConsent()).not.toThrow();
+		expect(stopGoogleAnalytics).toHaveBeenCalledTimes(1);
+		expect(listener).toHaveBeenCalledTimes(1);
+	});
+});
+
 describe("reopenConsent", () => {
 	it("unloads GA, clears the stored choice, and notifies", () => {
 		const listener = vi.fn();

@@ -1,4 +1,9 @@
 import { stopGoogleAnalytics } from "@/lib/analytics";
+import {
+	getLocalStorageItem,
+	removeLocalStorageItem,
+	setLocalStorageItem,
+} from "@/lib/safe-storage";
 
 const CONSENT_KEY = "cookie-consent";
 
@@ -14,7 +19,7 @@ export function subscribeToConsent(callback: () => void) {
 }
 
 export function getConsentSnapshot(): ConsentStatus {
-	const stored = localStorage.getItem(CONSENT_KEY);
+	const stored = getLocalStorageItem(CONSENT_KEY);
 	if (stored === "accepted" || stored === "rejected") return stored;
 	return null;
 }
@@ -28,12 +33,12 @@ function notifyConsentListeners() {
 }
 
 export function setStoredConsent(value: "accepted" | "rejected") {
-	localStorage.setItem(CONSENT_KEY, value);
+	setLocalStorageItem(CONSENT_KEY, value);
 	notifyConsentListeners();
 }
 
 export function reopenConsent() {
 	stopGoogleAnalytics();
-	localStorage.removeItem(CONSENT_KEY);
+	removeLocalStorageItem(CONSENT_KEY);
 	notifyConsentListeners();
 }

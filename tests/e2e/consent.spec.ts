@@ -142,6 +142,31 @@ test.describe("consent-first analytics", () => {
 		).toBe("rejected");
 	});
 
+	test("home still renders when localStorage access is denied", async ({
+		page,
+	}) => {
+		await blockAnalytics(page);
+		await page.addInitScript(() => {
+			const denied = new DOMException(
+				"Failed to read the 'localStorage' property from 'Window': Access is denied for this document.",
+				"SecurityError",
+			);
+			Object.defineProperty(window, "localStorage", {
+				configurable: true,
+				get() {
+					throw denied;
+				},
+			});
+		});
+
+		await page.goto("/");
+
+		await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+		await expect(page.getByRole("navigation")).toBeVisible();
+		await expect(page.getByRole("dialog", CONSENT_DIALOG)).toBeVisible();
+		await expect(page.locator(GTM_SCRIPT)).toHaveCount(0);
+	});
+
 	test("Cookie settings is on the shared footer including /hire", async ({
 		page,
 	}) => {

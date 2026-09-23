@@ -68,13 +68,17 @@ export function stopGoogleAnalytics(): void {
 		.forEach((el) => el.remove());
 	document.getElementById("google-analytics")?.remove();
 
-	const hostname = win.location.hostname;
-	const expired = "Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie.split(";").forEach((entry) => {
-		const name = entry.split("=")[0]?.trim();
-		if (!name || !isGoogleAnalyticsCookie(name)) return;
-		document.cookie = `${name}=; expires=${expired}; path=/`;
-		document.cookie = `${name}=; expires=${expired}; path=/; domain=${hostname}`;
-		document.cookie = `${name}=; expires=${expired}; path=/; domain=.${hostname}`;
-	});
+	try {
+		const hostname = win.location.hostname;
+		const expired = "Thu, 01 Jan 1970 00:00:00 GMT";
+		document.cookie.split(";").forEach((entry) => {
+			const name = entry.split("=")[0]?.trim();
+			if (!name || !isGoogleAnalyticsCookie(name)) return;
+			document.cookie = `${name}=; expires=${expired}; path=/`;
+			document.cookie = `${name}=; expires=${expired}; path=/; domain=${hostname}`;
+			document.cookie = `${name}=; expires=${expired}; path=/; domain=.${hostname}`;
+		});
+	} catch (err) {
+		console.error("Failed to expire analytics cookies:", err);
+	}
 }

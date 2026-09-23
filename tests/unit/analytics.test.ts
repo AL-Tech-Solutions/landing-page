@@ -175,6 +175,30 @@ describe("stopGoogleAnalytics", () => {
 		expect(cookies.get("cookie-consent")).toBe("accepted");
 	});
 
+	it("does not throw when document.cookie access is denied", () => {
+		const { win, children } = installBrowser();
+		Object.defineProperty(document, "cookie", {
+			configurable: true,
+			get() {
+				throw new DOMException(
+					"Access is denied for this document.",
+					"SecurityError",
+				);
+			},
+			set() {
+				throw new DOMException(
+					"Access is denied for this document.",
+					"SecurityError",
+				);
+			},
+		});
+
+		loadGoogleAnalytics();
+		expect(() => stopGoogleAnalytics()).not.toThrow();
+		expect(readGaDisableFlag(win)).toBe(true);
+		expect(children).toHaveLength(0);
+	});
+
 	it("does not throw when gtag is missing, then load can inject again", () => {
 		const { win, children } = installBrowser();
 		delete (win as { gtag?: unknown }).gtag;

@@ -6,6 +6,7 @@ import {
 	useContext,
 	useSyncExternalStore,
 } from "react";
+import { getLocalStorageItem, setLocalStorageItem } from "@/lib/safe-storage";
 
 const LITE_MODE_STORAGE_KEY = "reduce-effects";
 
@@ -42,7 +43,7 @@ function subscribeToReduceEffects(callback: () => void) {
 }
 
 function getReduceEffectsSnapshot(): boolean {
-	const stored = localStorage.getItem(LITE_MODE_STORAGE_KEY);
+	const stored = getLocalStorageItem(LITE_MODE_STORAGE_KEY);
 	if (stored !== null) return stored === "true";
 	return detectLowEndDevice();
 }
@@ -52,7 +53,7 @@ function getReduceEffectsServerSnapshot(): boolean {
 }
 
 function setStoredReduceEffects(value: boolean) {
-	localStorage.setItem(LITE_MODE_STORAGE_KEY, String(value));
+	setLocalStorageItem(LITE_MODE_STORAGE_KEY, String(value));
 	reduceEffectsListeners.forEach((cb) => cb());
 }
 
