@@ -7,9 +7,9 @@ import {
 	useSyncExternalStore,
 } from "react";
 
-const LITE_MODE_STORAGE_KEY = "reduce-effects";
+export const LITE_MODE_STORAGE_KEY = "reduce-effects";
 
-function detectLowEndDevice(): boolean {
+export function detectLowEndDevice(): boolean {
 	if (typeof window === "undefined") return false;
 
 	const prefersReducedMotion = window.matchMedia(
@@ -34,24 +34,24 @@ function detectLowEndDevice(): boolean {
 
 const reduceEffectsListeners = new Set<() => void>();
 
-function subscribeToReduceEffects(callback: () => void) {
+export function subscribeToReduceEffects(callback: () => void) {
 	reduceEffectsListeners.add(callback);
 	return () => {
 		reduceEffectsListeners.delete(callback);
 	};
 }
 
-function getReduceEffectsSnapshot(): boolean {
+export function getReduceEffectsSnapshot(): boolean {
 	const stored = localStorage.getItem(LITE_MODE_STORAGE_KEY);
 	if (stored !== null) return stored === "true";
 	return detectLowEndDevice();
 }
 
-function getReduceEffectsServerSnapshot(): boolean {
+export function getReduceEffectsServerSnapshot(): boolean {
 	return false;
 }
 
-function setStoredReduceEffects(value: boolean) {
+export function setStoredReduceEffects(value: boolean) {
 	localStorage.setItem(LITE_MODE_STORAGE_KEY, String(value));
 	reduceEffectsListeners.forEach((cb) => cb());
 }
