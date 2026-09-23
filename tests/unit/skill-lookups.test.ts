@@ -32,11 +32,19 @@ describe("getCategoryForDiscipline", () => {
 	it("classifies AWS-prefixed and known AWS service names as cloud", () => {
 		expect(getCategoryForDiscipline("AWS Lambda")).toBe("cloud");
 		expect(getCategoryForDiscipline("EC2")).toBe("cloud");
+		expect(getCategoryForDiscipline("AWS(EKS)")).toBe("cloud");
+		expect(getCategoryForDiscipline("Amazon Web Services")).toBe("cloud");
 		expect(
 			getCategoryForDiscipline(
 				"Amazon Elastic Kubernetes Service (Amazon EKS)",
 			),
 		).toBe("cloud");
+	});
+
+	it("keeps Flux on InfluxDB monitoring and FinOps uncategorized", () => {
+		expect(getCategoryForDiscipline("Flux")).toBe("monitoring");
+		expect(getCategoryForDiscipline("FinOps")).toBe("other");
+		expect(getCategoryForDiscipline("Version Control")).toBe("tools");
 	});
 
 	it("returns other for empty or unknown skills", () => {
@@ -74,10 +82,16 @@ describe("getIconForDiscipline", () => {
 		);
 		expect(getIconForDiscipline("EC2")).toEqual(skillIconMap.AWS);
 		expect(getIconForDiscipline("Amazon S3")).toEqual(skillIconMap.AWS);
+		expect(getIconForDiscipline("AWS(EKS)")).toEqual(skillIconMap.AWS);
+		expect(getIconForDiscipline("Amazon Web Services")).toEqual(
+			skillIconMap.AWS,
+		);
 		expect(getIconForDiscipline("GKE")).toEqual(skillIconMap.GKE);
 		expect(getIconForDiscipline("Google Kubernetes Engine")).toEqual(
 			skillIconMap.GKE,
 		);
+		expect(getIconForDiscipline("Flux")).toEqual(skillIconMap.Flux);
+		expect(getIconForDiscipline("Flux")?.path).toBe(skillIconMap.InfluxDB.path);
 	});
 
 	it("returns null for empty or unknown skills", () => {

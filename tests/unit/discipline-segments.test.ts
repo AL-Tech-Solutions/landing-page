@@ -27,6 +27,20 @@ describe("parseDisciplineListItems", () => {
 		).toEqual(["Terraform", "Docker", "EKS", "S3"]);
 	});
 
+	it("expands AWS parentheticals without a space before the paren", () => {
+		expect(parseDisciplineListItems(["AWS(EC2, S3)"])).toEqual(["EC2", "S3"]);
+	});
+
+	it("expands AWS groups case-insensitively and keeps inner service casing", () => {
+		expect(parseDisciplineListItems(["aws (EC2, S3)"])).toEqual(["EC2", "S3"]);
+	});
+
+	it("expands nested parentheses inside an AWS group", () => {
+		expect(
+			parseDisciplineListItems(["AWS (Foo (bar, baz), Qux), Terraform"]),
+		).toEqual(["Foo (bar, baz)", "Qux", "Terraform"]);
+	});
+
 	it("does not expand an unbalanced AWS parenthesis group", () => {
 		expect(parseDisciplineListItems(["AWS (EC2, S3"])).toEqual(["(EC2, S3"]);
 	});
