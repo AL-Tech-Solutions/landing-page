@@ -57,3 +57,16 @@ Lookups from raw discipline strings (do not reimplement):
 - Lone `AWS` is icon-only (`getDisciplineChipDisplayLabel` returns `""`; keep `aria-label`)
 
 `CategorizedTagList` / `ExpandableTagList` consume these helpers. Pass the raw data string; do not pre-split in the card.
+
+## Consent and analytics
+
+Do not load `gtag` from `layout.tsx` or page files.
+
+- `src/lib/consent.ts` — `cookie-consent` key (`accepted` \| `rejected`). `setStoredConsent` writes + notifies. `reopenConsent()` calls `stopGoogleAnalytics()`, removes the key, notifies (footer **Cookie settings**). `getConsentServerSnapshot()` is always `null` so SSR never treats analytics as accepted.
+- `src/lib/analytics.ts` — `loadGoogleAnalytics()` injects the gtag script + config (needed after Reject → Accept). `stopGoogleAnalytics()` sets `ga-disable-<id>`, denies `analytics_storage`, removes the scripts, and expires `_ga` / `_gid` / `_gat*` cookies. Measurement ID stays in this module. Do not add GA `preconnect` / `dns-prefetch` in layout.
+
+`ConsentProvider` uses `useSyncExternalStore` against those helpers. Tests: `tests/unit/consent.test.ts`, `tests/unit/analytics.test.ts`, `tests/e2e/consent.spec.ts`.
+
+## JSON-LD
+
+`src/lib/json-ld.ts` exports `person` and `personJsonLd` only. See `marketing-seo.mdc`. Do not add ProfessionalService, OfferCatalog, email, `worksFor`, or `seeks`.
