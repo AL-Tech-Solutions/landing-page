@@ -1,4 +1,6 @@
 export interface Experience {
+	/** Stable SoT id for Writing relatedExperience refs. */
+	id: string;
 	position: string;
 	work_mode: string;
 	company: string;
@@ -15,6 +17,7 @@ export interface Experience {
 
 export const experiences: Experience[] = [
 	{
+		id: "geniusee-senior-devops",
 		position: "Senior DevOps Engineer",
 		work_mode: "Remote",
 		company: "Geniusee Inc.",
@@ -35,6 +38,7 @@ export const experiences: Experience[] = [
 		company_logo: "geniusee.webp",
 	},
 	{
+		id: "luxoft-jpmc-lead",
 		position: "Senior/Lead DevOps Engineer",
 		work_mode: "Remote",
 		company: "Luxoft Poland",
@@ -56,6 +60,7 @@ export const experiences: Experience[] = [
 		client_logo: "chase.webp",
 	},
 	{
+		id: "luxoft-mbux-devops",
 		position: "DevOps Engineer",
 		work_mode: "Remote",
 		company: "Luxoft Poland",
@@ -93,6 +98,7 @@ export const experiences: Experience[] = [
 		client_logo: "mercedes.webp",
 	},
 	{
+		id: "self-employed-devops",
 		position: "DevOps Engineer",
 		work_mode: "Remote",
 		company: "Self-Employed",
@@ -111,6 +117,7 @@ export const experiences: Experience[] = [
 			"Amazon DynamoDB, Amazon EC2, Amazon Elastic Container Registry (ECR), Amazon Elastic Kubernetes Service (Amazon EKS), Amazon Relational Database Service (RDS), Amazon S3, Amazon VPC (Virtual Private Cloud), Ansible, AWS, AWS Lambda, C Programming Language, C#, C++, CentOS, CI/CD, CI/CD Fundamentals, CMake, Configuration Management, Continuous Deployment, Continuous Integration, Database Administration, Debian GNU/Linux, DevOps Fundamentals, DevOps Tools, Django, Docker, Docker Compose, Firewalls, Flask, Git, GITBash, GitHub, GitHub Actions, GitHub CI, Google Test, HashiCorp Terraform, Jenkins, Jenkins Pipeline, Kubernetes, Linux, Linux Virtualization, Load Balancing, MariaDB, Microservices, Microsoft Azure DevOps, Microsoft Azure Pipelines, Microsoft Visual Studio, Microsoft Windows, Microsoft Windows 10, MongoDB, MySQL, PostgreSQL, Python, Python Testing, Redis, SQL, SQLite, Version Control, VirtualBox, VM, VMware, VMWare Linux, VPN, Vulnerability Scanners, YAML.",
 	},
 	{
+		id: "self-employed-fullstack",
 		position: "Full-Stack Web Developer",
 		work_mode: "Remote",
 		company: "Self-Employed",
@@ -129,6 +136,7 @@ export const experiences: Experience[] = [
 			"Apache WEB Server, Cascading Style Sheets (CSS), HTML, JavaScript, jQuery, Laravel, MySQL, Nginx, PHP, SQLite.",
 	},
 	{
+		id: "settlement-sysadmin",
 		position: "System Administrator",
 		work_mode: "On-site",
 		company: "Self-Employed",

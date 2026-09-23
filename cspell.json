@@ -46,6 +46,8 @@
 		"rightsizing",
 		"Assoc",
 		"JPMorgan",
+		"jpmc",
+		"devci",
 		"lvmlockd",
 		"Lytvynenko",
 		"MBUX",
@@ -59,7 +61,16 @@
 		"vitest",
 		"UODO",
 		"Voivodeship",
-		"WCAG"
+		"WCAG",
+		"Boutique",
+		"frontmatter",
+		"llms",
+		"MDX",
+		"mdx",
+		"hashicorp",
+		"kubeconfigs",
+		"datasource",
+		"CONTAINERD"
 	],
 	"flagWords": [],
 	"ignoreRegExpList": [

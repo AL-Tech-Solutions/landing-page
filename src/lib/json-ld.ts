@@ -58,3 +58,8 @@ export const personJsonLd = {
 	"@context": "https://schema.org",
 	...person,
 };
+
+/** JSON-LD for a script tag: escape `<` so a value cannot break into HTML. */
+export function serializeJsonLd(data: unknown): string {
+	return JSON.stringify(data).replace(/</g, "\\u003c");
+}

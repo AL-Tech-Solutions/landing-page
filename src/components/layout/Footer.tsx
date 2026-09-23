@@ -53,6 +53,20 @@ export function Footer() {
 					</Link>
 					{" · "}
 					<CookieSettingsButton />
+					{" · "}
+					<Link
+						href="/writing/"
+						className="inline-flex min-h-[44px] items-center hover:text-foreground"
+					>
+						Writing
+					</Link>
+					{" · "}
+					<a
+						href="/writing/llms.txt"
+						className="inline-flex min-h-[44px] items-center hover:text-foreground focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+					>
+						For assistants
+					</a>
 				</p>
 				<ul className="flex justify-center gap-6">
 					<li>

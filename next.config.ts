@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
 	images: {
 		unoptimized: true,
 	},
+	serverExternalPackages: ["next-mdx-remote"],
 };
 
 export default nextConfig;

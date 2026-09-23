@@ -11,7 +11,7 @@ max_concurrency = 4
 no_progress = true
 
 # Scan source files, not just markdown.
-extensions = ["md", "ts", "tsx", "xml", "json"]
+extensions = ["md", "mdx", "ts", "tsx", "xml", "json"]
 
 # Don't follow redirects through more than 5 hops.
 max_redirects = 5
@@ -28,6 +28,8 @@ exclude = [
     "^https://t\\.me/",
     "^https://api\\.whatsapp\\.com/",
     "^https://(www\\.)?uodo\\.gov\\.pl/",
+    # Writing URLs 404 on the live site until this branch is deployed.
+    "^https://alytvynenko\\.net/writing",
 ]
 
 # What to scan: source files + content files. Skip build output.

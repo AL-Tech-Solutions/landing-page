@@ -13,9 +13,17 @@ const DIPLOMA_SUPPLEMENT_VIEWER_PATH = "/pdf/diploma-supplement.pdf";
 export function EducationCard() {
 	return (
 		<GlassCard>
-			<h2 className="mb-6 text-2xl font-bold tracking-tight text-foreground">
-				Education
-			</h2>
+			<div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+				<h2 className="text-2xl font-bold tracking-tight text-foreground">
+					Education
+				</h2>
+				<Link
+					href="/writing/"
+					className="inline-flex min-h-[44px] items-center text-sm text-muted hover:text-foreground"
+				>
+					Writing
+				</Link>
+			</div>
 			<div className="space-y-6">
 				{educations.map((edu) => (
 					<article

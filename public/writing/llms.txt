@@ -1,0 +1,7 @@
+# Writing — Andrii Lytvynenko
+
+Academic and lab notes: https://alytvynenko.net/writing/
+
+## Notes
+
+- [Layered Terraform on GKE — KhAI diploma lab](https://alytvynenko.net/writing/layered-terraform-gke-lab/): How I split a GCP/GKE diploma lab into three Terraform roots (init → in-cluster ops → config) with GitLab CI and observability.

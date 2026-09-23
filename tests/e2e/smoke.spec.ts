@@ -38,6 +38,7 @@ test.describe("home page renders", () => {
 			"Languages",
 			"Experience",
 			"Education",
+			"Writing",
 		]) {
 			const h2 = page.getByRole("heading", { level: 2, name: heading });
 			await expect(h2, `${heading} h2 missing`).toBeVisible();
@@ -350,6 +351,7 @@ test.describe("subpages render with navigation", () => {
 			path: "/hire/",
 			h1: /Hire DevOps that cuts cloud cost and keeps systems up/i,
 		},
+		{ path: "/writing/", h1: /^Writing$/ },
 	]) {
 		test(`${path} renders nav + footer + h1`, async ({ page }) => {
 			await page.goto(path);

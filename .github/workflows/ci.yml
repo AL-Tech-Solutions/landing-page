@@ -77,8 +77,10 @@ jobs:
             --config ./lychee.toml
             README.md
             src/
+            content/
             public/sitemap.xml
             public/manifest.json
+            public/writing/llms.txt
           fail: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

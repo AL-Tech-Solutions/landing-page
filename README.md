@@ -141,6 +141,14 @@ Or run `npm run logos` for Wikimedia-sourced company/university marks. See `publ
 
 **Skill chips:** add the icon to `skillIconMap` in `src/data/skillIcons.ts`, map it in the private `skillCategoryMap`, and add a `disciplineAliases` entry if experience/education text uses a variant name. `parseDisciplineListItems` in `src/lib/discipline-segments.ts` expands `AWS (EKS, S3)` into separate chips.
 
+**Writing notes**
+
+1. Add `content/writing/<slug>.mdx` with required frontmatter (`title`, `summary`, `date`, `last_verified`, `type`, `aiSummary`, `aiInstruction`).
+2. Keep `aiInstruction` identical to the lawyer-locked string in `src/data/writing.ts`.
+3. Point `relatedExperience` only at Experience `id`s or position titles that already exist.
+4. Update `public/writing/llms.txt` and `public/sitemap.xml` (unit tests check they stay in sync).
+5. Hub, article pages, and the home Writing block (after Education, only if a note is published) read MDX at build time. Static export; no database.
+
 ## Routes
 
 | Path                                             | Source                                                                |
@@ -150,6 +158,9 @@ Or run `npm run logos` for Wikimedia-sourced company/university marks. See `publ
 | `/resume/`                                       | Resume iframe + download                                              |
 | `/viewer/{resume\|diploma\|diploma-supplement}/` | Shared PDF viewer (`generateStaticParams`)                            |
 | `/privacy-policy/`, `/cookie-policy/`            | Legal pages (`robots: noindex`)                                       |
+| `/writing/`                                      | Academic/lab notes hub (MDX in `content/writing/`)                    |
+| `/writing/[slug]/`                               | Static note pages (`generateStaticParams`)                            |
+| `/writing/llms.txt`                              | Plain-text index of notes for assistants                              |
 | unknown                                          | `src/app/not-found.tsx` (navbar + footer; required for static 404)    |
 
 ## Deployment
@@ -168,11 +179,12 @@ Push to `main` runs lint → typecheck → build → `peaceiris/actions-gh-pages
 ```
 src/
 ├── app/           # App Router pages, layout, globals.css
-├── components/    # layout, bento, hero, ui, providers
-├── data/          # profile, hire, experiences, certificates, education, skillIcons
-├── lib/           # animations, analytics, discipline parsing, hooks
+├── components/    # layout, bento, hero, ui, writing, providers
+├── data/          # profile, hire, experiences, certificates, education, skillIcons, writing
+├── lib/           # animations, analytics, discipline parsing, writing MDX loader, hooks
 └── types/
-public/            # images, pdf, CNAME, manifest, sitemap
+content/writing/   # Git-backed MDX notes (frontmatter + body)
+public/            # images, pdf, CNAME, manifest, sitemap, writing/llms.txt
 tests/e2e/         # Playwright smoke + axe
 tools/             # favicon, logos, PNG→WebP
 .github/workflows/ # ci.yml (PR), gitleaks.yml (PR + main), osv-scanner.yml (PR + main), deploy.yml (main)

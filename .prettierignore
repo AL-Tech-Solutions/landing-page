@@ -40,3 +40,6 @@ __pycache__
 .env
 .env*.local
 .DS_Store
+
+# MDX notes (YAML frontmatter must stay space-indented)
+content/**/*.mdx
