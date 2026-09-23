@@ -2,19 +2,16 @@
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useId, useMemo, useState } from "react";
-import {
-	getCategoryForDiscipline,
-	getCanonicalForDiscipline,
-	SKILL_CATEGORIES,
-} from "@/data/skillIcons";
+import { SKILL_CATEGORIES } from "@/data/skillIcons";
 import {
 	softSpringTransition as springTransition,
 	instantTransition,
 } from "@/lib/animations";
+import { getDisciplineChipDisplayLabel } from "@/lib/discipline-segments";
 import {
-	getDisciplineChipDisplayLabel,
-	parseDisciplineListItems,
-} from "@/lib/discipline-segments";
+	groupDisciplinesForDisplay,
+	slugifyAccordionTitle,
+} from "@/lib/discipline-groups";
 
 interface CategorizedTagListProps {
 	title: string;
@@ -37,43 +34,14 @@ export function CategorizedTagList({
 	const prefersReducedMotion = useReducedMotion();
 	const instanceId = useId().replace(/:/g, "");
 
-	const { parsedItems, groupedByCategory } = useMemo(() => {
-		const parsed = parseDisciplineListItems(items);
-
-		const grouped: Record<string, string[]> = {};
-		const seen: Record<string, Set<string>> = {};
-
-		for (const item of parsed) {
-			const cat = getCategoryForDiscipline(item);
-			const canonical = getCanonicalForDiscipline(item);
-			if (!grouped[cat]) grouped[cat] = [];
-			if (!seen[cat]) seen[cat] = new Set();
-			if (seen[cat].has(canonical)) continue;
-			seen[cat].add(canonical);
-			grouped[cat].push(canonical !== item ? canonical : item);
-		}
-
-		return { parsedItems: parsed, groupedByCategory: grouped };
-	}, [items]);
+	const { parsedItems, groupedByCategory, orderedCategoryIds } = useMemo(
+		() => groupDisciplinesForDisplay(items),
+		[items],
+	);
 
 	if (parsedItems.length === 0) return null;
 
-	// Ordered category ids (excluding empty; "other" last)
-	const orderedCategories = SKILL_CATEGORIES.filter(
-		(c) => groupedByCategory[c.id]?.length,
-	).map((c) => c.id);
-
-	// Ensure "other" is last if present
-	const otherIdx = orderedCategories.indexOf("other");
-	if (otherIdx >= 0 && otherIdx < orderedCategories.length - 1) {
-		orderedCategories.splice(otherIdx, 1);
-		orderedCategories.push("other");
-	}
-
-	const slug = title
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-|-$/g, "");
+	const slug = slugifyAccordionTitle(title);
 	const contentId = `${slug}-content-${instanceId}`;
 	const triggerId = `${slug}-trigger-${instanceId}`;
 
@@ -158,7 +126,7 @@ export function CategorizedTagList({
 									hidden: {},
 								}}
 							>
-								{orderedCategories.map((catId) => {
+								{orderedCategoryIds.map((catId) => {
 									const cat = SKILL_CATEGORIES.find((c) => c.id === catId);
 									const catItems = groupedByCategory[catId] ?? [];
 									if (!cat || catItems.length === 0) return null;
